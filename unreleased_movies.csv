@@ -1,0 +1,3 @@
+movie_id,title,genre,budget_usd,runtime_minutes,is_sequel_or_prequel,ip_source_type,distributor_tier,mpaa_rating,director_hist_avg_revenue_usd,lead_actor_hist_avg_revenue_usd,release_month,is_summer_release,is_holiday_release
+201,Starlight Odyssey,Sci-Fi,180000000,130,0,Book,Major Studio,PG-13,350000000,250000000,7,1,0
+202,The Comedy Heist,Comedy,30000000,96,0,Original,Mid-Tier,R,40000000,60000000,12,0,1
