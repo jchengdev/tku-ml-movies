@@ -10,13 +10,25 @@ from xgboost import XGBRegressor
 def preprocess_data(df):
     df = df.copy()
 
-    # 1. Clean theater counts (remove commas like "1,907")
+    # Clean theater counts
     if "theaters" in df.columns:
         df["theaters"] = pd.to_numeric(
             df["theaters"].astype(str).str.replace(",", "").str.strip(), errors="coerce"
         )
+        # Fill missing theaters with the median theater count
+        df["theaters"] = df["theaters"].fillna(df["theaters"].median())
 
-    # 2. Parse release date into seasonal features
+    # Fill missing duration with median
+    if "duration_minutes" in df.columns:
+        df["duration_minutes"] = df["duration_minutes"].fillna(
+            df["duration_minutes"].median()
+        )
+
+    # Fill missing budget with median (or 0)
+    if "budget" in df.columns:
+        df["budget"] = df["budget"].fillna(df["budget"].median())
+
+    # Parse release date
     if "release_date" in df.columns:
         df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
         df["release_month"] = df["release_date"].dt.month
