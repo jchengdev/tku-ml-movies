@@ -7,13 +7,45 @@ from sklearn.model_selection import train_test_split
 from xgboost import XGBRegressor
 
 
+def preprocess_data(df):
+    df = df.copy()
+
+    # 1. Clean theater counts (remove commas like "1,907")
+    if "theaters" in df.columns:
+        df["theaters"] = pd.to_numeric(
+            df["theaters"].astype(str).str.replace(",", "").str.strip(), errors="coerce"
+        )
+
+    # 2. Parse release date into seasonal features
+    if "release_date" in df.columns:
+        df["release_date"] = pd.to_datetime(df["release_date"], errors="coerce")
+        df["release_month"] = df["release_date"].dt.month
+        df["is_summer_release"] = df["release_month"].isin([5, 6, 7]).astype(int)
+        df["is_holiday_release"] = df["release_month"].isin([11, 12]).astype(int)
+
+    return df
+
+
 def main():
     print("1. Loading dataset...")
     df = pd.read_csv("movie_box_office_dataset.csv")
 
-    # 2. Separate Features (X) and Target (y)
-    X = df.drop(columns=["movie_id", "title", "box_office_revenue_usd"])
-    y = df["box_office_revenue_usd"]
+    df = preprocess_data(df)
+
+    # 2. Define columns to drop (Target, Identifiers, Post-release Leakage)
+    drop_cols = [
+        "title",
+        "movie_id",
+        "release_date",
+        "domestic",
+        "international",
+        "opening",
+        "metacritic_score",
+        "box_office",
+    ]
+
+    X = df.drop(columns=[col for col in drop_cols if col in df.columns])
+    y = df["box_office"]
 
     # 3. Handle Categorical Data (One-Hot Encoding)
     X = pd.get_dummies(X, drop_first=True)
