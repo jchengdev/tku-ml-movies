@@ -29,6 +29,7 @@ COLUMNS = [
 ]
 
 OMDB_API_KEY = "1b7be36e"
+TMDB_API_KEY = "53e8c9056a2bc53c91f359d222e86f06"
 START_DATE = datetime(2020, 1, 1)
 END_DATE = datetime(2026, 7, 31)
 
@@ -119,66 +120,33 @@ def fetch_omdb_data(title, year=None):
     return {}
 
 
+def fetch_tmdb(title, year=None):
+    """Fetches production companies from TMDB API to replace broken IMDb scraping."""
+    search_url = "https://api.themoviedb.org/3/search/movie"
+    params = {"api_key": TMDB_API_KEY, "query": title}
+    if year:
+        params["year"] = year
+    try:
+        resp = requests.get(search_url, params=params)
+        if resp.status_code == 200:
+            results = resp.json().get("results", [])
+            if results:
+                movie_id = results[0]["id"]
+                detail_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
+                detail_resp = requests.get(detail_url, params={"api_key": TMDB_API_KEY})
+                if detail_resp.status_code == 200:
+                    comps = detail_resp.json().get("production_companies", [])
+                    return ", ".join([c["name"] for c in comps])
+    except Exception as e:
+        print(f"Error fetching TMDB production for {title}: {e}")
+    return ""
+
+
 def generate_numbers_slug(title, year):
     """Dynamically creates The Numbers URL slug from title and year."""
     base_slug = re.sub(r"[^a-zA-Z0-9\s]", "", title)
     base_slug = re.sub(r"\s+", "-", base_slug.strip())
     return f"{base_slug}-({year})"
-
-
-def scrape_imdb(page, mojo_id):
-    """Extracts production companies from IMDb's __NEXT_DATA__ JSON using your blueprint schema."""
-    if not mojo_id:
-        return ""
-    try:
-        credits_url = f"https://www.imdb.com/title/{mojo_id}/companycredits"
-
-        # Go to page and wait for network to settle so anti-bot checks clear
-        page.goto(credits_url, timeout=60000, wait_until="domcontentloaded")
-
-        # Wait explicitly for the Next.js data script to appear
-        try:
-            page.wait_for_selector("script#__NEXT_DATA__", timeout=10000)
-        except Exception:
-            print(f"Debug: Blocked or missing __NEXT_DATA__ for {mojo_id}")
-            return ""
-
-        script_tag = page.locator("script#__NEXT_DATA__")
-        if script_tag.count() == 0:
-            return ""
-
-        data = json.loads(script_tag.inner_text())
-
-        # Recursive search matching your exact blueprint structure
-        # (props -> pageProps -> contentData -> data -> title -> companyCreditCategories)
-        production_names = []
-
-        def recursive_search(obj):
-            if isinstance(obj, dict):
-                cat = obj.get("category", {})
-                if isinstance(cat, dict) and cat.get("id") == "production":
-                    edges = obj.get("companyCredits", {}).get("edges", [])
-                    for edge in edges:
-                        node = edge.get("node", {})
-                        plain_text = (
-                            node.get("displayableProperty", {})
-                            .get("value", {})
-                            .get("plainText")
-                        )
-                        if plain_text and plain_text not in production_names:
-                            production_names.append(plain_text.strip())
-                for v in obj.values():
-                    recursive_search(v)
-            elif isinstance(obj, list):
-                for item in obj:
-                    recursive_search(item)
-
-        recursive_search(data)
-        return ", ".join(production_names) if production_names else ""
-
-    except Exception as e:
-        print(f"Error parsing Next.js JSON for production credits on {mojo_id}: {e}")
-        return ""
 
 
 def scrape_financials_with_playwright(numbers_slug, mojo_id):
@@ -234,7 +202,7 @@ def scrape_financials_with_playwright(numbers_slug, mojo_id):
             except Exception as e:
                 print(f"Error scraping The Numbers for {numbers_slug}: {e}")
 
-        # 2. Scrape Box Office Mojo & IMDb Production Credits
+        # 2. Scrape Box Office Mojo
         if mojo_id:
             try:
                 mojo_url = f"https://www.boxofficemojo.com/title/{mojo_id}/"
@@ -295,11 +263,8 @@ def scrape_financials_with_playwright(numbers_slug, mojo_id):
                             if dist_text:
                                 data["distributor"] = dist_text
 
-                # Rule 5: Scrape IMDb Production Companies via your JSON schema
-                data["production"] = scrape_imdb(page, mojo_id)
-
             except Exception as e:
-                print(f"Error scraping Box Office Mojo/IMDb for {mojo_id}: {e}")
+                print(f"Error scraping Box Office Mojo for {mojo_id}: {e}")
 
         browser.close()
     return data
@@ -334,11 +299,14 @@ def process_movie(title_query, year):
 
     financials = scrape_financials_with_playwright(numbers_slug, mojo_id)
 
+    # Fetch production via TMDB API
+    tmdb_production = fetch_tmdb(title_query, year)
+
     row = {
         "Release Date": release_raw,
         "Title": omdb.get("Title", title_query),
-        "Production": financials.get("production")
-        if financials.get("production")
+        "Production": tmdb_production
+        if tmdb_production
         else clean_val(omdb.get("Production")),
         "Distributor": (
             financials.get("distributor", "-")
