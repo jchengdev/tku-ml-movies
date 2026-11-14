@@ -149,7 +149,7 @@ def generate_numbers_slug(title, year):
     return f"{base_slug}-({year})"
 
 
-def scrape_financials_with_playwright(numbers_slug, mojo_id):
+def scrape_financials_with_playwright(numbers_slug, mojo_id, title_query):
     data = {
         "budget": "-",
         "theaters": "-",
@@ -165,42 +165,93 @@ def scrape_financials_with_playwright(numbers_slug, mojo_id):
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
-        # 1. Scrape The Numbers (Budget & Theaters)
+        # Helper function to parse budget and theaters from the movie page table
+        def parse_numbers_page(soup_num):
+            for row in soup_num.find_all("tr"):
+                row_text = row.get_text().replace("\xa0", " ")
+
+                if "Production Budget" in row_text:
+                    cells = row.find_all("td")
+                    if len(cells) >= 2:
+                        raw_text = cells[1].get_text().strip()
+                        match = re.search(r"\$[\d,]+", raw_text)
+                        if match:
+                            data["budget"] = match.group(0)
+                        else:
+                            data["budget"] = raw_text
+
+                if "Theater counts" in row_text or "Theaters" in row_text:
+                    cells = row.find_all("td")
+                    if len(cells) >= 2:
+                        raw_text = cells[1].get_text().strip()
+                        match = re.search(
+                            r"([\d,]+)\s*opening theaters", raw_text, re.IGNORECASE
+                        )
+                        if match:
+                            data["theaters"] = match.group(1)
+                        else:
+                            data["theaters"] = raw_text
+
+        # 1. Scrape The Numbers (Budget & Theaters) via Slug or Search Fallback
+        success = False
         if numbers_slug:
             try:
                 numbers_url = f"https://www.the-numbers.com/movie/{numbers_slug}"
-                page.goto(numbers_url, timeout=60000)
-                page.wait_for_selector("table", timeout=5000)
+                page.goto(numbers_url, timeout=30000)
 
+                if "Page Not Found" in page.title() or "404" in page.content():
+                    raise Exception("Direct slug resulted in 404")
+
+                page.wait_for_selector("table", timeout=4000)
                 soup_num = BeautifulSoup(page.content(), "html.parser")
+                parse_numbers_page(soup_num)
+                success = True
+            except Exception:
+                pass  # Fall back to search
 
-                for row in soup_num.find_all("tr"):
-                    row_text = row.get_text().replace("\xa0", " ")
+        # Fallback Search with Corrected Query Parameter (?q=)
+        if not success:
+            try:
+                # FIX: Use 'q' parameter for keyword search on The Numbers
+                search_url = f"https://www.the-numbers.com/search?q={title_query.replace(' ', '+')}"
+                print(f"   🔎 [Debug] Querying search URL: {search_url}")
+                page.goto(search_url, timeout=30000)
 
-                    if "Production Budget" in row_text:
-                        cells = row.find_all("td")
-                        if len(cells) >= 2:
-                            raw_text = cells[1].get_text().strip()
-                            match = re.search(r"\$[\d,]+", raw_text)
-                            if match:
-                                data["budget"] = match.group(0)
-                            else:
-                                data["budget"] = raw_text
+                # Wait for the search results container to render
+                page.wait_for_selector(".search-results-list", timeout=5000)
 
-                    if "Theater counts" in row_text or "Theaters" in row_text:
-                        cells = row.find_all("td")
-                        if len(cells) >= 2:
-                            raw_text = cells[1].get_text().strip()
-                            match = re.search(
-                                r"([\d,]+)\s*opening theaters", raw_text, re.IGNORECASE
-                            )
-                            if match:
-                                data["theaters"] = match.group(1)
-                            else:
-                                data["theaters"] = raw_text
+                soup_search = BeautifulSoup(page.content(), "html.parser")
+                results_list = soup_search.find("div", class_="search-results-list")
 
+                if results_list:
+                    first_item = results_list.find(
+                        "div", class_="search-suggestion-item"
+                    )
+                    if first_item:
+                        title_div = first_item.find(
+                            "div", class_="search-suggestion-title"
+                        )
+                        if title_div:
+                            a_tag = title_div.find("a")
+                            if a_tag and a_tag.get("href"):
+                                relative_href = a_tag[
+                                    "href"
+                                ]  # e.g., "/movie/Scream-7-(2026)"
+                                resolved_url = (
+                                    f"https://www.the-numbers.com{relative_href}"
+                                )
+                                print(f"   🔗 [Info] Resolved URL: {resolved_url}")
+
+                                page.goto(resolved_url, timeout=30000)
+                                page.wait_for_selector("table", timeout=4000)
+
+                                soup_num = BeautifulSoup(page.content(), "html.parser")
+                                parse_numbers_page(soup_num)
+                                success = True
             except Exception as e:
-                print(f"Error scraping The Numbers for {numbers_slug}: {e}")
+                print(
+                    f"   ❌ [The Numbers] Search fallback encountered an exception for '{title_query}': {e}"
+                )
 
         # 2. Scrape Box Office Mojo
         if mojo_id:
@@ -297,7 +348,7 @@ def process_movie(title_query, year):
     numbers_slug = generate_numbers_slug(title_query, year)
     mojo_id = omdb.get("imdbID", None)
 
-    financials = scrape_financials_with_playwright(numbers_slug, mojo_id)
+    financials = scrape_financials_with_playwright(numbers_slug, mojo_id, title_query)
 
     # Fetch production via TMDB API
     tmdb_production = fetch_tmdb(title_query, year)
