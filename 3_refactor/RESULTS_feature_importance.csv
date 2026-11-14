@@ -1,0 +1,61 @@
+"Permutation importance = drop in held-out R2 (log scale) when the feature is shuffled, averaged over 5 CV folds. Top rows = most important; bottom rows = least (negative = noise, model does slightly better without it).",,,,,
+,,,,,
+Opening model,,,,,
+Rank,Feature,Ridge (baseline),Random Forest,Gradient Boosting,Average
+1,log_theaters,1.840,1.535,1.563,1.646
+2,theaters_missing,0.638,0.039,0.045,0.240
+3,duration,-0.001,0.041,0.038,0.026
+4,budget_missing,0.044,0.003,0.004,0.017
+5,genre_Family,0.019,0.001,0.000,0.007
+6,rerelease,0.010,0.001,0.001,0.004
+7,major_studio,0.011,0.000,0.000,0.004
+8,genre_Comedy,0.001,0.003,0.005,0.003
+9,genre_Animation,0.010,0.000,-0.001,0.003
+10,rating_R,0.001,0.003,0.005,0.003
+11,genre_Action,0.005,0.000,0.001,0.002
+12,sequel,0.005,0.000,0.001,0.002
+13,event_cinema,0.006,0.001,-0.001,0.002
+14,rating_PG-13,0.003,0.001,0.001,0.002
+15,log_budget,0.003,-0.001,0.002,0.001
+16,genre_Music,0.000,0.003,0.000,0.001
+17,rating_G,0.000,0.000,0.000,0.000
+18,genre_Adventure,0.001,0.000,-0.001,0.000
+19,genre_Fantasy,0.000,0.000,0.000,0.000
+20,genre_Sci-Fi,0.000,0.000,0.000,0.000
+21,genre_Horror,-0.002,0.000,0.001,-0.001
+22,rating_PG,-0.002,0.000,0.000,-0.001
+23,genre_Documentary,0.000,0.000,-0.002,-0.001
+24,us_production,0.000,-0.002,-0.001,-0.001
+25,genre_Drama,-0.001,-0.001,-0.002,-0.002
+26,genre_Thriller,-0.002,-0.001,-0.002,-0.002
+,,,,,
+,,,,,
+Box office model,,,,,
+Rank,Feature,Ridge (baseline),Random Forest,Gradient Boosting,Average
+1,log_theaters,1.165,1.067,0.995,1.076
+2,duration,0.031,0.134,0.086,0.084
+3,theaters_missing,0.183,-0.008,-0.017,0.053
+4,us_production,0.056,0.005,0.025,0.029
+5,rerelease,0.066,-0.004,0.004,0.022
+6,log_budget,0.020,0.004,0.040,0.021
+7,budget_missing,0.059,0.003,0.001,0.021
+8,days_out,0.006,0.013,0.028,0.016
+9,major_studio,0.020,0.001,0.005,0.009
+10,rating_G,0.015,0.000,0.001,0.006
+11,genre_Adventure,0.012,0.001,0.002,0.005
+12,sequel,0.007,0.000,0.005,0.004
+13,rating_R,0.007,0.001,0.003,0.004
+14,event_cinema,0.003,0.000,0.000,0.001
+15,genre_Family,0.004,0.000,-0.001,0.001
+16,rating_PG,0.001,0.000,0.001,0.001
+17,genre_Action,-0.001,0.000,0.002,0.000
+18,genre_Music,0.001,0.000,-0.001,0.000
+19,genre_Animation,0.000,-0.001,0.000,0.000
+20,genre_Comedy,-0.004,0.002,0.001,0.000
+21,rating_PG-13,0.006,-0.001,-0.006,0.000
+22,genre_Documentary,0.001,0.000,-0.003,0.000
+23,genre_Drama,-0.005,-0.001,0.003,-0.001
+24,genre_Horror,-0.002,-0.001,0.000,-0.001
+25,genre_Thriller,-0.002,0.000,-0.002,-0.001
+26,genre_Fantasy,-0.003,-0.001,0.000,-0.002
+27,genre_Sci-Fi,-0.008,-0.001,-0.002,-0.004

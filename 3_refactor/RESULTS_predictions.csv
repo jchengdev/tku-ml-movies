@@ -1,0 +1,13 @@
+Release Date,Title,Opening Weekend (USD),Box Office by Day 7 (USD),Box Office by Day 30 (USD),Box Office by Day 60 (USD),Box Office by Day 90 (USD),Ridge cross-check: Day 90 (USD)
+2026-11-20,The Hunger Games: Sunrise on the Reaping,"$23,834,626","$102,076,569","$109,971,510","$115,445,339","$116,464,204","$361,604,025"
+2026-12-18,Avengers: Doomsday,"$23,844,584","$100,957,477","$108,765,864","$114,179,682","$115,077,307","$493,917,278"
+2026-12-18,Dune: Part Three,"$24,624,360","$101,382,935","$109,224,228","$114,565,916","$115,466,578","$475,166,046"
+2027-01-15,The Beekeeper 2,"$25,019,098","$129,387,883","$142,468,911","$146,020,441","$147,128,071","$63,628,459"
+2027-01-22,Animal Friends,"$11,665,343","$72,782,584","$75,582,540","$83,324,931","$84,313,697","$83,517,749"
+2027-03-26,Godzilla x Kong: Supernova,"$23,834,626","$102,076,569","$109,971,510","$115,445,339","$116,464,204","$316,681,562"
+2027-07-30,A Quiet Place Part III,"$30,505,194","$150,136,369","$168,152,764","$176,271,669","$177,556,998","$91,580,285"
+2027-05-01,The Legend of Zelda,"$20,637,717","$96,004,756","$103,404,535","$108,389,073","$109,534,193","$259,650,701"
+,,,,,,,
+Primary model: Random Forest (log-scale target). Ridge column is an independent linear cross-check; large gaps = low confidence.,,,,,,,
+"Training films top out at ~4,160 theaters and ~$410M, so blockbuster forecasts (Avengers, Dune, etc.) are the least reliable.",,,,,,,
+Typical error on held-out movies is large (see Model Metrics): use these as order-of-magnitude estimates.,,,,,,,
