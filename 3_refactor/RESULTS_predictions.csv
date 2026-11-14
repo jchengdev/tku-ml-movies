@@ -8,6 +8,6 @@ Release Date,Title,Opening Weekend (USD),Box Office by Day 7 (USD),Box Office by
 2027-07-30,A Quiet Place Part III,"$30,505,194","$150,136,369","$168,152,764","$176,271,669","$177,556,998","$91,580,285"
 2027-05-01,The Legend of Zelda,"$20,637,717","$96,004,756","$103,404,535","$108,389,073","$109,534,193","$259,650,701"
 ,,,,,,,
-Primary model: Random Forest (log-scale target). Ridge column is an independent linear cross-check; large gaps = low confidence.,,,,,,,
-"Training films top out at ~4,160 theaters and ~$410M, so blockbuster forecasts (Avengers, Dune, etc.) are the least reliable.",,,,,,,
-Typical error on held-out movies is large (see Model Metrics): use these as order-of-magnitude estimates.,,,,,,,
+,,,,,,,Primary model: Random Forest (log-scale target). Ridge column is an independent linear cross-check; large gaps = low confidence.
+,,,,,,,"Training films top out at ~4,160 theaters and ~$410M, so blockbuster forecasts (Avengers, Dune, etc.) are the least reliable."
+,,,,,,,Typical error on held-out movies is large (see Model Metrics): use these as order-of-magnitude estimates.
