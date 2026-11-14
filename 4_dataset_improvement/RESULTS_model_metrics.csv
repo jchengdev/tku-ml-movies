@@ -1,8 +1,8 @@
-Evaluation on: ALL 458 films (outliers included),,,,,,,,,,,
+Evaluation on: ALL 452 films (outliers included),,,,,,,,,,,
 Target,Model,Train n,Test n,Test R2 (log scale),Test RMSLE,Test Median abs % error,Test MAE (USD),CV R2 (log scale),CV RMSLE,CV Median abs % error,CV MAE (USD)
-Opening,Ridge (baseline),315,79,0.83,0.54,70%,"$12,302,226",0.82,0.54,64%,"$16,132,879"
-Opening,Random Forest,315,79,0.87,0.47,62%,"$11,123,269",0.84,0.51,58%,"$15,574,861"
-Opening,Gradient Boosting,315,79,0.86,0.50,63%,"$10,268,670",0.84,0.50,60%,"$15,130,244"
-Box office to date (days_out as a feature),Ridge (baseline),366,92,0.65,0.91,84%,"$116,758,268",0.66,0.86,84%,"$131,277,803"
-Box office to date (days_out as a feature),Random Forest,366,92,0.73,0.79,76%,"$92,671,903",0.77,0.71,71%,"$97,888,107"
-Box office to date (days_out as a feature),Gradient Boosting,366,92,0.73,0.80,77%,"$100,857,471",0.76,0.72,75%,"$104,295,798"
+Opening,Ridge (baseline),310,78,0.84,0.52,63%,"$13,781,199",0.82,0.54,63%,"$16,093,486"
+Opening,Random Forest,310,78,0.90,0.42,50%,"$11,166,958",0.85,0.49,55%,"$14,827,122"
+Opening,Gradient Boosting,310,78,0.89,0.44,57%,"$11,694,473",0.85,0.50,58%,"$14,930,398"
+Box office to date (days_out as a feature),Ridge (baseline),361,91,0.68,0.88,85%,"$142,308,640",0.66,0.87,84%,"$129,314,261"
+Box office to date (days_out as a feature),Random Forest,361,91,0.72,0.82,79%,"$121,734,899",0.77,0.71,70%,"$99,841,990"
+Box office to date (days_out as a feature),Gradient Boosting,361,91,0.73,0.80,86%,"$119,508,666",0.75,0.73,74%,"$106,728,042"
